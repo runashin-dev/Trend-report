@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded',()=>{if(sessionStorage.getItem('aut
 
 <div class="container">
 <div class="header"><h1>시술·수술 SU 트렌드 분석</h1><p>2026년 4월 기준 · 국가별 SU 데이터</p></div>
-<div class="country-tabs"><button class="country-btn active" onclick="switchCountry('korea')" style="--accent:#4f46e5;--accent-bg:#eef2ff;--accent-shadow:rgba(79,70,229,0.2)"><span class="flag">🇰🇷</span> 국내</button><button class="country-btn" onclick="switchCountry('japan')" style="--accent:#e11d48;--accent-bg:#fff1f2;--accent-shadow:rgba(225,29,72,0.2)"><span class="flag">🇯🇵</span> 일본</button><button class="country-btn" onclick="switchCountry('thailand')" style="--accent:#ea580c;--accent-bg:#fff7ed;--accent-shadow:rgba(234,88,12,0.2)"><span class="flag">🇹🇭</span> 태국</button><button class="country-btn" onclick="switchCountry('taiwan')" style="--accent:#0891b2;--accent-bg:#ecfeff;--accent-shadow:rgba(8,145,178,0.2)"><span class="flag">🇹🇼</span> 대만</button><button class="country-btn" onclick="switchCountry('china')" style="--accent:#dc2626;--accent-bg:#fef2f2;--accent-shadow:rgba(220,38,38,0.2)"><span class="flag">🇨🇳</span> 중국</button><button class="country-btn" onclick="switchCountry('english')" style="--accent:#2563eb;--accent-bg:#eff6ff;--accent-shadow:rgba(37,99,235,0.2)"><span class="flag">🇺🇸</span> 영미</button><button class="pdf-btn" onclick="openPdfModal()">📄 PDF 다운로드</button></div><div id="korea-section" class="country-section active" style="--accent:#4f46e5;--accent-bg:#eef2ff;--accent-shadow:rgba(79,70,229,0.2)"><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('korea','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('korea','susul')">수술</button><button class="sub-tab-btn" onclick="switchSubTab('korea','reco')">🔮 5~7월 추천</button></div><div id="korea-sisul-tab" class="tab-content active"></div><div id="korea-susul-tab" class="tab-content"></div><div id="korea-reco-tab" class="tab-content"></div></div><div id="japan-section" class="country-section" style="--accent:#e11d48;--accent-bg:#fff1f2;--accent-shadow:rgba(225,29,72,0.2)"><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('japan','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('japan','susul')">수술</button><button class="sub-tab-btn" onclick="switchSubTab('japan','reco')">🔮 5~7월 추천</button></div><div id="japan-sisul-tab" class="tab-content active"></div><div id="japan-susul-tab" class="tab-content"></div><div id="japan-reco-tab" class="tab-content"></div></div><div id="thailand-section" class="country-section" style="--accent:#ea580c;--accent-bg:#fff7ed;--accent-shadow:rgba(234,88,12,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('thailand','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('thailand','susul')">수술</button></div><div id="thailand-sisul-tab" class="tab-content active"></div><div id="thailand-susul-tab" class="tab-content"></div></div><div id="taiwan-section" class="country-section" style="--accent:#0891b2;--accent-bg:#ecfeff;--accent-shadow:rgba(8,145,178,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('taiwan','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('taiwan','susul')">수술</button></div><div id="taiwan-sisul-tab" class="tab-content active"></div><div id="taiwan-susul-tab" class="tab-content"></div></div><div id="china-section" class="country-section" style="--accent:#dc2626;--accent-bg:#fef2f2;--accent-shadow:rgba(220,38,38,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('china','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('china','susul')">수술</button></div><div id="china-sisul-tab" class="tab-content active"></div><div id="china-susul-tab" class="tab-content"></div></div><div id="english-section" class="country-section" style="--accent:#2563eb;--accent-bg:#eff6ff;--accent-shadow:rgba(37,99,235,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('english','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('english','susul')">수술</button></div><div id="english-sisul-tab" class="tab-content active"></div><div id="english-susul-tab" class="tab-content"></div></div>
+<div class="country-tabs"><button class="country-btn active" onclick="switchCountry('korea')" style="--accent:#4f46e5;--accent-bg:#eef2ff;--accent-shadow:rgba(79,70,229,0.2)"><span class="flag">🇰🇷</span> 국내</button><button class="country-btn" onclick="switchCountry('japan')" style="--accent:#e11d48;--accent-bg:#fff1f2;--accent-shadow:rgba(225,29,72,0.2)"><span class="flag">🇯🇵</span> 일본</button><button class="country-btn" onclick="switchCountry('thailand')" style="--accent:#ea580c;--accent-bg:#fff7ed;--accent-shadow:rgba(234,88,12,0.2)"><span class="flag">🇹🇭</span> 태국</button><button class="country-btn" onclick="switchCountry('taiwan')" style="--accent:#0891b2;--accent-bg:#ecfeff;--accent-shadow:rgba(8,145,178,0.2)"><span class="flag">🇹🇼</span> 대만</button><button class="country-btn" onclick="switchCountry('china')" style="--accent:#dc2626;--accent-bg:#fef2f2;--accent-shadow:rgba(220,38,38,0.2)"><span class="flag">🇨🇳</span> 중국</button><button class="country-btn" onclick="switchCountry('english')" style="--accent:#2563eb;--accent-bg:#eff6ff;--accent-shadow:rgba(37,99,235,0.2)"><span class="flag">🌏</span> 그 외 국가</button><button class="pdf-btn" onclick="openPdfModal()">📄 PDF 다운로드</button></div><div id="korea-section" class="country-section active" style="--accent:#4f46e5;--accent-bg:#eef2ff;--accent-shadow:rgba(79,70,229,0.2)"><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('korea','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('korea','susul')">수술</button><button class="sub-tab-btn" onclick="switchSubTab('korea','reco')">🔮 5~7월 추천</button></div><div id="korea-sisul-tab" class="tab-content active"></div><div id="korea-susul-tab" class="tab-content"></div><div id="korea-reco-tab" class="tab-content"></div></div><div id="japan-section" class="country-section" style="--accent:#e11d48;--accent-bg:#fff1f2;--accent-shadow:rgba(225,29,72,0.2)"><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('japan','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('japan','susul')">수술</button><button class="sub-tab-btn" onclick="switchSubTab('japan','reco')">🔮 5~7월 추천</button></div><div id="japan-sisul-tab" class="tab-content active"></div><div id="japan-susul-tab" class="tab-content"></div><div id="japan-reco-tab" class="tab-content"></div></div><div id="thailand-section" class="country-section" style="--accent:#ea580c;--accent-bg:#fff7ed;--accent-shadow:rgba(234,88,12,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('thailand','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('thailand','susul')">수술</button></div><div id="thailand-sisul-tab" class="tab-content active"></div><div id="thailand-susul-tab" class="tab-content"></div></div><div id="taiwan-section" class="country-section" style="--accent:#0891b2;--accent-bg:#ecfeff;--accent-shadow:rgba(8,145,178,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('taiwan','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('taiwan','susul')">수술</button></div><div id="taiwan-sisul-tab" class="tab-content active"></div><div id="taiwan-susul-tab" class="tab-content"></div></div><div id="china-section" class="country-section" style="--accent:#dc2626;--accent-bg:#fef2f2;--accent-shadow:rgba(220,38,38,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('china','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('china','susul')">수술</button></div><div id="china-sisul-tab" class="tab-content active"></div><div id="china-susul-tab" class="tab-content"></div></div><div id="english-section" class="country-section" style="--accent:#2563eb;--accent-bg:#eff6ff;--accent-shadow:rgba(37,99,235,0.2)"><div class="metric-note-wrap"><span class="metric-note">📊 YoY 대신 <b>QoQ(분기 대비)</b>를 메인 지표로 사용합니다</span></div><div class="sub-tabs"><button class="sub-tab-btn active" onclick="switchSubTab('english','sisul')">시술</button><button class="sub-tab-btn" onclick="switchSubTab('english','susul')">수술</button></div><div id="english-sisul-tab" class="tab-content active"></div><div id="english-susul-tab" class="tab-content"></div></div>
 <div class="pdf-modal-overlay" id="pdfModal" onclick="if(event.target===this)closePdfModal()">
 <div class="pdf-modal">
 <h3>📄 PDF 다운로드</h3>
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded',()=>{if(sessionStorage.getItem('aut
 <div class="pdf-country-item" data-country="thailand" onclick="togglePdfCountry(this)"><span>🇹🇭</span> 태국</div>
 <div class="pdf-country-item" data-country="taiwan" onclick="togglePdfCountry(this)"><span>🇹🇼</span> 대만</div>
 <div class="pdf-country-item" data-country="china" onclick="togglePdfCountry(this)"><span>🇨🇳</span> 중국</div>
-<div class="pdf-country-item" data-country="english" onclick="togglePdfCountry(this)"><span>🇺🇸</span> 영미</div>
+<div class="pdf-country-item" data-country="english" onclick="togglePdfCountry(this)"><span>🌏</span> 그 외 국가</div>
 </div>
 <div class="pdf-actions">
 <button class="pdf-cancel" onclick="closePdfModal()">취소</button>
@@ -184,17 +184,108 @@ checks.forEach(cb=>{if(cb.checked)st.active.add(cb.value)});
 if(st.active.size===0){checks[0].checked=true;st.active.add(checks[0].value)}
 renderChart(tabId)}
 
-function renderChart(tabId){
+function toggleMetric(tabId,metric){
+  const st=window._chartState[tabId];if(!st)return;
+  let sel=st.selectedMetrics||['yoy','mom'];
+  const idx=sel.indexOf(metric);
+  if(idx>-1)sel.splice(idx,1);else sel.push(metric);
+  if(!sel.length)sel=['yoy']; // at least one must be selected
+  st.selectedMetrics=sel;
+  // Update button styles
+  const wrap=document.getElementById(tabId+'-metric-toggles');
+  if(wrap){
+    wrap.querySelectorAll('.metric-toggle-btn').forEach(btn=>{
+      const mk=btn.dataset.metric;
+      const isActive=sel.includes(mk);
+      btn.classList.toggle('active',isActive);
+      btn.style.opacity=isActive?'1':'.5';
+      btn.style.background=isActive?(mk==='yoy'?'#ecfdf5':mk==='mom'?'#fff7ed':'#eef2ff'):'#fff';
+    });
+  }
+  renderChart(tabId,sel);
+}
+
+function renderChart(tabId, selectedMetrics){
 const st=window._chartState[tabId];if(!st)return;
 const cv=document.getElementById(tabId+'-overview');if(!cv)return;
 if(chartInstances[tabId+'-overview'])chartInstances[tabId+'-overview'].destroy();
+
+// Default: show mainLabel + MoM
+if(!selectedMetrics)selectedMetrics=st.selectedMetrics||['yoy','mom'];
+st.selectedMetrics=selectedMetrics;
+
 const cats=[...st.catNames].filter(c=>st.active.has(c)&&st.data[c]);
 const suTotals=cats.map(c=>st.data[c].items.reduce((s,i)=>s+i.s,0));
-chartInstances[tabId+'-overview']=new Chart(cv,{type:'bar',data:{labels:cats,datasets:[
-{label:'SU 유입량',data:suTotals,backgroundColor:st.accentRgba+'0.45)',borderColor:st.accentRgba+'0.7)',borderWidth:1,borderRadius:6,yAxisID:'y1',order:2,datalabels:{display:false}},
-{label:st.mainLabel,data:cats.map(c=>st.data[c].metrics.yoy),type:'line',borderColor:'rgba(16,185,129,0.9)',borderWidth:2.5,pointBackgroundColor:'#10b981',pointRadius:5,fill:false,tension:.3,yAxisID:'y',order:1,datalabels:{align:'top',color:'#10b981'}},
-{label:'MoM',data:cats.map(c=>st.data[c].metrics.mom),type:'line',borderColor:'rgba(234,88,12,0.9)',borderWidth:2.5,pointBackgroundColor:'#ea580c',pointRadius:5,fill:false,tension:.3,yAxisID:'y',order:1,borderDash:[6,3],datalabels:{align:'bottom',color:'#ea580c'}}
-]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{labels:{color:'#666'}},tooltip:{callbacks:{label:function(ctx){if(ctx.dataset.label==='SU 유입량')return'SU 유입량 (상대비교)';return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}},datalabels:{font:{size:11,weight:'bold'},formatter:v=>(v>0?'+':'')+v.toFixed(1)+'%',padding:4}},scales:{x:{ticks:{color:'#666'},grid:{color:'#e8e8ee'}},y:{position:'right',ticks:{color:'#666',callback:v=>v+'%'},grid:{drawOnChartArea:false}},y1:{position:'left',display:true,ticks:{display:false},grid:{color:'#e8e8ee'},beginAtZero:true}}}})}
+
+// Cap extreme % values for readability
+function cap(v){return Math.max(-200,Math.min(v,200))}
+
+const metricMap={
+  yoy:{key:'yoy',label:'YoY',color:'rgba(16,185,129,',dash:[]},
+  mom:{key:'mom',label:'MoM',color:'rgba(234,88,12,',dash:[6,4]},
+  qoq:{key:'hoh',label:'QoQ',color:'rgba(99,102,241,',dash:[3,3]}
+};
+
+const datasets=[{
+  label:'SU 유입량',data:suTotals,
+  backgroundColor:st.accentRgba+'0.25)',borderColor:st.accentRgba+'0.5)',
+  borderWidth:1,borderRadius:6,yAxisID:'y1',order:10
+}];
+
+selectedMetrics.forEach(mk=>{
+  const m=metricMap[mk];
+  if(!m)return;
+  const vals=cats.map(c=>{
+    const raw=st.data[c].metrics[m.key];
+    return cap(raw);
+  });
+  datasets.push({
+    type:'line',label:m.label,data:vals,
+    borderColor:m.color+'0.85)',backgroundColor:m.color+'0.15)',
+    borderWidth:2.5,borderDash:m.dash,
+    pointRadius:3,pointBackgroundColor:m.color+'1)',
+    pointBorderColor:'#fff',pointBorderWidth:2,
+    tension:.3,fill:false,yAxisID:'y',order:datasets.length
+  });
+});
+
+// Update metric toggle buttons
+const toggleWrap=document.getElementById(tabId+'-metric-toggles');
+if(toggleWrap){
+  toggleWrap.querySelectorAll('.metric-toggle-btn').forEach(btn=>{
+    const mk=btn.dataset.metric;
+    btn.classList.toggle('active',selectedMetrics.includes(mk));
+  });
+}
+
+chartInstances[tabId+'-overview']=new Chart(cv,{type:'bar',data:{labels:cats,datasets},options:{
+  responsive:true,maintainAspectRatio:false,
+  plugins:{
+    legend:{display:true,position:'top',labels:{font:{size:11},boxWidth:14,padding:10,color:'#888',usePointStyle:false}},
+    tooltip:{mode:'index',intersect:false,callbacks:{
+      label:function(ctx){
+        if(ctx.dataset.label==='SU 유입량'){
+          const v=ctx.raw;
+          return'SU: '+(v>=10000?(v/10000).toFixed(1)+'만':v>=1000?(v/1000).toFixed(1)+'천':v);
+        }
+        return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%';
+      }
+    }},
+    datalabels:{font:{size:12,weight:'bold'},anchor:'end',align:'top',offset:4,
+      formatter:(v,ctx)=>{
+        if(ctx.dataset.label==='SU 유입량')return'';
+        return(v>0?'+':'')+v.toFixed(1)+'%';
+      },
+      color:(ctx)=>ctx.dataset.borderColor||'#666',padding:2
+    }
+  },
+  scales:{
+    x:{ticks:{color:'#666'},grid:{color:'#e8e8ee'}},
+    y:{position:'right',ticks:{color:'#666',callback:v=>v+'%'},grid:{drawOnChartArea:false}},
+    y1:{position:'left',display:true,ticks:{display:false},grid:{color:'#e8e8ee'},beginAtZero:true}
+  }
+}})
+}
 
 function renderBars(items,ml){if(!items.length)return'';const mx=Math.max(...items.map(i=>i.s));let h=`<div class="bar-row" style="margin-bottom:10px;font-size:.75em;color:#aaa;font-weight:600"><div class="bar-name"></div><div class="bar-wrap" style="background:none"></div><div class="bar-metrics"><div class="bar-yoy">${ml}</div><div class="bar-mom">MoM</div></div></div>`;h+=items.map(i=>{const w=mx>0?(i.s/mx*100):0,cl=i.y>=0?'#10b981':'#ef4444';return`<div class="bar-row"><div class="bar-name" title="${i.n}">${i.n}</div><div class="bar-wrap"><div class="bar-fill" style="width:${w}%;background:${cl}55;border-left:3px solid ${cl}"></div></div><div class="bar-metrics"><div class="bar-yoy">${fmt(i.y)}</div><div class="bar-mom">${fmt(i.m)}</div></div></div>`}).join('');return h}
 function renderTop3(items,ml){
@@ -282,7 +373,7 @@ const showChart=document.getElementById('pdfChart').checked;
 const showTrend=document.getElementById('pdfTrend').checked;
 if(!showSisul&&!showSusul)return alert('시술 또는 수술 중 하나 이상 선택해주세요');
 
-const names={korea:'🇰🇷 국내',japan:'🇯🇵 일본',thailand:'🇹🇭 태국',taiwan:'🇹🇼 대만',china:'🇨🇳 중국',english:'🇺🇸 영미'};
+const names={korea:'🇰🇷 국내',japan:'🇯🇵 일본',thailand:'🇹🇭 태국',taiwan:'🇹🇼 대만',china:'🇨🇳 중국',english:'🌏 그 외 국가'};
 
 // Phase 1: Init uninitiated countries off-screen
 const needInit=[];
