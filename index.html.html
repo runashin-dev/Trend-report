@@ -278,7 +278,7 @@ function switchCountry(country){
   if(!document.getElementById(country+'-sisul-tab').innerHTML)initCountry(country);
 }
 
-function switchTab(country,tab){
+function switchSubTab(country,tab){
   const sec=document.getElementById(country+'-section');
   sec.querySelectorAll('.sub-tab,.sub-tab-btn').forEach(b=>b.classList.remove('active'));
   event.currentTarget.classList.add('active');
