@@ -382,7 +382,7 @@ chartInstances[tabId+'-overview']=new Chart(cv,{type:'bar',data:{labels:cats,dat
   onClick:function(evt,elements){if(!elements.length)return;const idx2=elements[0].index;const cat2=cats[idx2];const catIdx=st.catNames.indexOf(cat2);if(catIdx>-1)toggleDetail(tabId+'-'+catIdx)},
   responsive:true,maintainAspectRatio:false,plugins:{
     legend:{display:true,position:'top',labels:{font:{size:11},boxWidth:14,padding:10,color:'#888'}},
-    tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){if(ctx.dataset.label==='SU 유입량'){const v=ctx.raw;return'SU: '+(v>=10000?(v/10000).toFixed(1)+'만':v>=1000?(v/1000).toFixed(1)+'천':v)}return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}},
+    tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){if(ctx.dataset.label==='SU 유입량'){return null}return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}},
     datalabels:{font:{size:12,weight:'bold'},anchor:'end',align:'top',offset:4,formatter:(v,ctx)=>{if(ctx.dataset.label==='SU 유입량')return'';return(v>0?'+':'')+v.toFixed(1)+'%'},color:(ctx)=>{if(ctx.dataset.label==='SU 유입량')return'#666';const v=ctx.dataset.data[ctx.dataIndex];return v>=0?'#3b82f6':'#ef4444'},padding:2}
   },scales:{x:{ticks:{color:'#666'},grid:{color:'#e8e8ee'}},y:{position:'right',ticks:{color:'#666',callback:v=>v+'%'},grid:{drawOnChartArea:false}},y1:{position:'left',display:true,ticks:{display:false},grid:{color:'#e8e8ee'},beginAtZero:true}}
 }})}
@@ -399,10 +399,10 @@ function renderTop3(items,ml){
   const dm=sm.filter(x=>x.m<0).sort((a,b)=>a.m-b.m).slice(0,3);
   const badge='<span style="display:inline-block;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#94a3b8;font-size:.72em;font-weight:500;margin-left:6px">상위 30%</span>';
   let h='<div class="top3-grid"><div class="top3-box"><h4>📈 MoM 성장 Top 3'+badge+'</h4>';
-  if(gm.length){gm.forEach(i=>{h+=`<div class="top3-item"><span>${i.n} <span style="font-size:.78em;color:#bbb">SU ${Math.round(i.s).toLocaleString()}</span></span>${fmt(i.m)}</div>`})}
+  if(gm.length){gm.forEach(i=>{h+=`<div class="top3-item"><span>${i.n}</span>${fmt(i.m)}</div>`})}
   else{h+='<div class="top3-item" style="color:#aaa">해당 없음</div>'}
   h+='</div><div class="top3-box"><h4>📉 MoM 하락 Top 3'+badge+'</h4>';
-  if(dm.length){dm.forEach(i=>{h+=`<div class="top3-item"><span>${i.n} <span style="font-size:.78em;color:#bbb">SU ${Math.round(i.s).toLocaleString()}</span></span>${fmt(i.m)}</div>`})}
+  if(dm.length){dm.forEach(i=>{h+=`<div class="top3-item"><span>${i.n}</span>${fmt(i.m)}</div>`})}
   else{h+='<div class="top3-item" style="color:#aaa">해당 없음</div>'}
   h+='</div></div>';return h
 }
@@ -440,7 +440,7 @@ function renderTrendForTag(panelId,item,accentRgba){
   if(!tagLabel){tagLabel=document.createElement('span');tagLabel.className='trend-tag-label';tagLabel.style.cssText='position:absolute;top:8px;left:12px;font-size:.8em;font-weight:700;color:#555;z-index:5';trendWrap.appendChild(tagLabel)}
   tagLabel.textContent='📌 '+item.n;
   const key=cvId;if(chartInstances[key])chartInstances[key].destroy();
-  chartInstances[key]=new Chart(cv,{type:'line',data:{labels:monthLabels,datasets:[{label:item.n,data:vals,borderColor:accentRgba+'0.85)',backgroundColor:'transparent',borderWidth:2.5,fill:false,tension:0,pointRadius:3,pointBackgroundColor:accentRgba+'0.85)',pointHoverRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{label:function(ctx){const v=ctx.raw;return item.n+': '+(v>=10000?(v/10000).toFixed(1)+'만':v>=1000?(v/1000).toFixed(1)+'천':v)}}}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{display:false}}}});
+  chartInstances[key]=new Chart(cv,{type:'line',data:{labels:monthLabels,datasets:[{label:item.n,data:vals,borderColor:accentRgba+'0.85)',backgroundColor:'transparent',borderWidth:2.5,fill:false,tension:0,pointRadius:3,pointBackgroundColor:accentRgba+'0.85)',pointHoverRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{display:false}}}});
 }
 
 function renderTrendChart(panelId,data,cat,accentRgba){
@@ -449,7 +449,7 @@ function renderTrendChart(panelId,data,cat,accentRgba){
   const monthLabels=['25.4','25.5','25.6','25.7','25.8','25.9','25.10','25.11','25.12','26.1','26.2','26.3','26.4'];
   const totals=new Array(13).fill(0);items.forEach(item=>{if(item.v)item.v.forEach((val,mi)=>{if(mi<13)totals[mi]+=val})});
   const key=cvId;if(chartInstances[key])chartInstances[key].destroy();
-  chartInstances[key]=new Chart(cv,{type:'line',data:{labels:monthLabels,datasets:[{label:cat+' 전체 SU',data:totals,borderColor:accentRgba+'0.85)',backgroundColor:'transparent',borderWidth:2.5,fill:false,tension:0,pointRadius:3,pointBackgroundColor:accentRgba+'0.85)',pointHoverRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{label:function(ctx){const v=ctx.raw;return cat+': '+(v>=10000?(v/10000).toFixed(1)+'만':v>=1000?(v/1000).toFixed(1)+'천':v)}}}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{display:false}}}});
+  chartInstances[key]=new Chart(cv,{type:'line',data:{labels:monthLabels,datasets:[{label:cat+' 전체 SU',data:totals,borderColor:accentRgba+'0.85)',backgroundColor:'transparent',borderWidth:2.5,fill:false,tension:0,pointRadius:3,pointBackgroundColor:accentRgba+'0.85)',pointHoverRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{display:false}}}});
 }
 
 function renderTagChart(panelId,data,cat,accentRgba,metricsOverride){
@@ -485,7 +485,7 @@ function renderTagChart(panelId,data,cat,accentRgba,metricsOverride){
       }
       if(idx2>=0&&idx2<items.length){const item=items[idx2];if(item&&item.v)renderTrendForTag(panelId,item,accentRgba)}
     },
-    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12,padding:8,color:'#888'}},datalabels:{display:function(ctx){return ctx.dataset.label!=='SU'},font:{size:11,weight:'bold'},anchor:'end',align:'top',offset:3,formatter:(v)=>(v>0?'+':'')+v.toFixed(1)+'%',color:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=0?'#3b82f6':'#ef4444',padding:1},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){if(ctx.dataset.label==='SU'){const v=ctx.raw;return'SU: '+(v>=10000?(v/10000).toFixed(1)+'만':v>=1000?(v/1000).toFixed(1)+'천':v)}return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}}},scales}});
+    plugins:{legend:{display:true,position:'top',labels:{font:{size:10},boxWidth:12,padding:8,color:'#888'}},datalabels:{display:function(ctx){return ctx.dataset.label!=='SU'},font:{size:11,weight:'bold'},anchor:'end',align:'top',offset:3,formatter:(v)=>(v>0?'+':'')+v.toFixed(1)+'%',color:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=0?'#3b82f6':'#ef4444',padding:1},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){if(ctx.dataset.label==='SU'){return null}return ctx.dataset.label+': '+(ctx.raw>0?'+':'')+ctx.raw.toFixed(1)+'%'}}}},scales}});
 }
 
 function renderSection(tabId,data,catNames,accentRgba,mainLabel){
