@@ -12,7 +12,7 @@
 .country-tabs{display:flex;gap:8px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}.country-btn{padding:10px 24px;background:#fff;border:2px solid #e0e0e8;border-radius:50px;color:#777;font-size:1em;cursor:pointer;transition:all .3s;font-weight:600;display:flex;align-items:center;gap:6px}.country-btn:hover{border-color:#aaa;color:#333;transform:translateY(-1px)}.country-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);box-shadow:0 2px 8px var(--accent-shadow)}.country-btn .flag{font-size:1.2em}
 .metric-note{text-align:center;margin:-10px 0 16px;font-size:.8em;color:#888;background:#f0f0f5;padding:6px 14px;border-radius:8px;display:inline-block}.metric-note-wrap{text-align:center;margin-bottom:16px}
 .sub-tabs{display:flex;gap:0;margin-bottom:25px;border-bottom:2px solid #e0e0e8}.sub-tab-btn{padding:12px 28px;background:none;border:none;color:#999;font-size:1.05em;cursor:pointer;border-bottom:3px solid transparent;position:relative;bottom:-2px;transition:all .3s}.sub-tab-btn:hover{color:#555}.sub-tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-.country-section{display:none}.country-section.active{display:block}.tab-content{display:none}.tab-content.active{display:block}
+.country-section{display:none}.country-section.active{display:block}.tab-content{display:none}.tab-content.active{display:block}.pch{display:none}
 .chart-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
 .chart-filters label{display:flex;align-items:center;gap:5px;font-size:.82em;color:#555;cursor:pointer;padding:4px 12px;border-radius:20px;border:1.5px solid #e0e0e8;background:#fff;transition:all .2s;user-select:none}
 .chart-filters label:hover{border-color:#aaa}
@@ -96,6 +96,10 @@
   .top3-grid{page-break-inside:avoid}
   .reco-cat{page-break-inside:avoid}
   .print-country-header{font-size:1.3em!important;color:#4f46e5!important;margin:0 0 6px!important;padding:4px 0 0!important}
+  .pch{display:flex!important;align-items:center;gap:8px;font-size:1.25em!important;font-weight:800!important;padding:8px 0 6px!important;margin:0 0 10px!important;border-bottom:2px solid currentColor}
+  .pch .pch-badge{color:#fff!important;padding:2px 9px;border-radius:5px;font-size:.62em;font-weight:800;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .country-section.print-target{page-break-before:always}
+  .country-section.print-target.pch-first{page-break-before:avoid}
 }
 
 .bar-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.85em}
@@ -739,9 +743,17 @@ async function exportPdf(){
     }
   }catch(e){ console.warn('pdf prep',e); }
 
-  const targetSections=[], shownTabs=[], deactivated=[], hidden=[];
-  document.querySelectorAll('.country-section').forEach(s=>s.classList.remove('print-target'));
-  countries.forEach(c=>{ const s=document.getElementById(c+'-section'); if(s){ s.classList.add('print-target'); targetSections.push(s);} });
+  const targetSections=[], shownTabs=[], deactivated=[], hidden=[], headers=[];
+  const _CMETA={korea:['국내','KR','#4f46e5'],japan:['일본','JP','#e11d48'],thailand:['태국','TH','#ea580c'],taiwan:['대만','TW','#0891b2'],china:['중국','CN','#dc2626'],english:['영미','US','#2563eb']};
+  document.querySelectorAll('.country-section').forEach(s=>s.classList.remove('print-target','pch-first'));
+  countries.forEach((c,i)=>{
+    const s=document.getElementById(c+'-section'); if(!s)return;
+    s.classList.add('print-target'); if(i===0)s.classList.add('pch-first'); targetSections.push(s);
+    const m=_CMETA[c]||[c,c,'#4f46e5'];
+    const h=document.createElement('div'); h.className='pch'; h.style.color=m[2];
+    h.innerHTML='<span class="pch-badge" style="background:'+m[2]+'">'+m[1]+'</span> '+m[0]+' · 시술·수술 SU 트렌드';
+    s.insertBefore(h,s.firstChild); headers.push(h);
+  });
   countries.forEach(c=>{
     [['sisul',wantSisul],['susul',wantSusul]].forEach(([m,want])=>{
       const tc=document.getElementById(c+'-'+m+'-tab');
@@ -755,7 +767,8 @@ async function exportPdf(){
   if(!wantTrend){ document.querySelectorAll('.trend-chart-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
 
   const restore=()=>{
-    targetSections.forEach(s=>s.classList.remove('print-target'));
+    targetSections.forEach(s=>s.classList.remove('print-target','pch-first'));
+    headers.forEach(h=>{try{h.remove();}catch(e){}});
     shownTabs.forEach(tc=>tc.classList.remove('pdf-show'));
     deactivated.forEach(tc=>tc.classList.add('active'));
     hidden.forEach(e=>e.classList.remove('print-hide'));
