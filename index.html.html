@@ -67,8 +67,12 @@
   .country-section.print-target{display:block!important}
   .tab-content{display:none!important}
   .tab-content.active{display:block!important}
+  .tab-content.pdf-show{display:block!important}
   [id$="-reco-tab"]{display:none!important}
-  .detail-panel{display:block!important}
+  .detail-panel{display:none!important}
+  .detail-panel.pdf-show{display:block!important}
+  ._pdfimg{max-width:100%!important;height:auto!important;display:block!important;margin:0 auto!important}
+  .trend-chart-wrap ._pdfimg,.tag-chart-wrap ._pdfimg{height:100%!important;width:auto!important;max-width:100%!important;object-fit:contain}
   .metric-note-wrap{display:block!important}
   body{padding:0!important;margin:0!important;background:#fff!important;font-size:11px!important}
   .container{max-width:100%!important;padding:0 10px!important}
@@ -210,6 +214,15 @@
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capTagChart" checked> <b>📉 상세 태그별 차트</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">YoY/MoM</span></label>
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capBars" checked> <b>📋 상세 태그 SU 바</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">수평 바</span></label>
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capTop3" checked> <b>🏆 MoM 성장/하락 Top 3</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">상위 30%</span></label>
+</div>
+<p style="color:#888;font-size:.82em;margin:2px 0 8px">국가 선택 <span style="color:#bbb;font-weight:400">· 미선택 시 현재 국가</span></p>
+<div class="pdf-country-grid" id="capCountryGrid">
+<div class="pdf-country-item cap-country-item" data-country="korea" onclick="this.classList.toggle('selected')"><span style="background:#4f46e5;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">KR</span> 국내</div>
+<div class="pdf-country-item cap-country-item" data-country="japan" onclick="this.classList.toggle('selected')"><span style="background:#e11d48;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">JP</span> 일본</div>
+<div class="pdf-country-item cap-country-item" data-country="thailand" onclick="this.classList.toggle('selected')"><span style="background:#ea580c;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">TH</span> 태국</div>
+<div class="pdf-country-item cap-country-item" data-country="taiwan" onclick="this.classList.toggle('selected')"><span style="background:#0891b2;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">TW</span> 대만</div>
+<div class="pdf-country-item cap-country-item" data-country="china" onclick="this.classList.toggle('selected')"><span style="background:#dc2626;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">CN</span> 중국</div>
+<div class="pdf-country-item cap-country-item" data-country="english" onclick="this.classList.toggle('selected')"><span style="background:#2563eb;color:#fff;padding:1px 5px;border-radius:3px;font-size:.7em;font-weight:700">US</span> 영미</div>
 </div>
 <div style="display:flex;gap:6px;margin-bottom:16px">
 <button onclick="document.querySelectorAll('#captureOverlay input[type=checkbox]').forEach(c=>c.checked=true)" style="padding:5px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;font-size:.8em">전체 선택</button>
@@ -628,10 +641,139 @@ function switchCompareTab(region,tab,btn){
 }
 
 // === PDF / Capture ===
-function openPdfModal(){document.getElementById('pdfModal')?.classList.add('show')}
+function openPdfModal(){document.getElementById('pdfModal')?.classList.add('show');updatePdfExportBtn();}
 function closePdfModal(){document.getElementById('pdfModal')?.classList.remove('show')}
 
-function exportPdf(){/* Use window.print() instead */window.print()}
+function getSelectedPdfCountries(){
+  return [...document.querySelectorAll('.pdf-country-item.selected')].map(e=>e.dataset.country);
+}
+function updatePdfExportBtn(){
+  const btn=document.getElementById('pdfExportBtn');
+  if(btn) btn.disabled = getSelectedPdfCountries().length===0;
+}
+function togglePdfCountry(el){ el.classList.toggle('selected'); updatePdfExportBtn(); }
+function toggleAllPdfCountries(){
+  const items=[...document.querySelectorAll('#pdfModal .pdf-country-item')];
+  const allOn = items.length>0 && items.every(i=>i.classList.contains('selected'));
+  items.forEach(i=>i.classList.toggle('selected', !allOn));
+  updatePdfExportBtn();
+}
+
+function _busyOverlay(msg){
+  const d=document.createElement('div');
+  d.id='_busyOv';
+  d.style.cssText='position:fixed;inset:0;background:rgba(255,255,255,.72);z-index:10001;display:flex;align-items:center;justify-content:center';
+  d.innerHTML='<div style="background:#fff;padding:18px 28px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.15);font-weight:600;color:#333">'+msg+'</div>';
+  document.body.appendChild(d); return d;
+}
+
+// 숨겨진 국가 섹션을 화면 밖에서 잠시 '실제 크기'로 보이게 해 차트를 그리게 함
+async function _withCountryVisible(country, fn){
+  const sec=document.getElementById(country+'-section'); if(!sec) return;
+  const sisul=document.getElementById(country+'-sisul-tab');
+  if(sisul && !sisul.innerHTML.trim() && typeof initCountry==='function'){ try{initCountry(country);}catch(e){} await new Promise(r=>setTimeout(r,200)); }
+  const prev=sec.getAttribute('style')||'';
+  sec.style.cssText=prev+';display:block!important;position:fixed;left:-10000px;top:0;width:1200px;z-index:-1;';
+  await new Promise(r=>setTimeout(r,60));
+  try{ await fn(sec); } finally { sec.setAttribute('style',prev); }
+}
+
+// 한 탭의 차트들을 그린 뒤 canvas→<img>(toDataURL)로 스냅샷 (인쇄 시 안정적으로 보이게)
+async function _snapshotTabCharts(tabId, wantChart, wantTrend, made){
+  const tab=document.getElementById(tabId); if(!tab) return;
+  const sec=tab.closest('.country-section');
+  sec.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  const st=window._chartState && window._chartState[tabId];
+  if(wantChart && st && typeof renderChart==='function'){ try{renderChart(tabId);}catch(e){} }
+  if(wantTrend && st){
+    const cats=[...st.catNames].filter(c=>st.active.has(c)&&st.data[c]);
+    for(const cat of cats){
+      const idx=st.catNames.indexOf(cat); const pid=tabId+'-'+idx;
+      const panel=document.getElementById(pid); if(!panel) continue;
+      panel.classList.add('show','pdf-show'); panel.style.display='block';
+      try{
+        if(!panel._tagMetrics)panel._tagMetrics=st.mainLabel==='MoM'?['mom']:['yoy'];
+        renderTrendChart(pid,st.data,cat,st.accentRgba);
+        renderTagChart(pid,st.data,cat,st.accentRgba);
+      }catch(e){}
+    }
+  }
+  await new Promise(r=>setTimeout(r,520));
+  tab.querySelectorAll('canvas').forEach(cv=>{
+    if(cv.width>0 && cv.height>0){
+      try{
+        const img=document.createElement('img');
+        img.src=cv.toDataURL('image/png');
+        img.className='_pdfimg';
+        cv.style.display='none';
+        cv.parentNode.insertBefore(img,cv);
+        made.push({img,cv});
+      }catch(e){}
+    }
+  });
+}
+
+async function exportPdf(){
+  const countries=getSelectedPdfCountries();
+  if(!countries.length){ alert('PDF로 내보낼 국가를 1개 이상 선택해주세요.'); return; }
+  const wantSisul=document.getElementById('pdfSisul')?.checked;
+  const wantSusul=document.getElementById('pdfSusul')?.checked;
+  const wantChart=document.getElementById('pdfChart')?.checked;
+  const wantTrend=document.getElementById('pdfTrend')?.checked;
+  if(!wantSisul && !wantSusul){ alert('시술/수술 중 1개 이상 선택해주세요.'); return; }
+  closePdfModal();
+  const busy=_busyOverlay('📄 PDF 준비 중 — 차트 렌더링…');
+
+  // 복구용 원래 활성 탭 기록
+  const origActiveTab={};
+  countries.forEach(c=>{ const a=document.querySelector('#'+c+'-section .tab-content.active'); origActiveTab[c]=a?a.id:null; });
+
+  const made=[];
+  try{
+    for(const c of countries){
+      await _withCountryVisible(c, async()=>{
+        if(wantSisul) await _snapshotTabCharts(c+'-sisul-tab', wantChart, wantTrend, made);
+        if(wantSusul) await _snapshotTabCharts(c+'-susul-tab', wantChart, wantTrend, made);
+      });
+    }
+  }catch(e){ console.warn('pdf prep',e); }
+
+  const targetSections=[], shownTabs=[], deactivated=[], hidden=[];
+  document.querySelectorAll('.country-section').forEach(s=>s.classList.remove('print-target'));
+  countries.forEach(c=>{ const s=document.getElementById(c+'-section'); if(s){ s.classList.add('print-target'); targetSections.push(s);} });
+  countries.forEach(c=>{
+    [['sisul',wantSisul],['susul',wantSusul]].forEach(([m,want])=>{
+      const tc=document.getElementById(c+'-'+m+'-tab');
+      if(tc && want){ tc.classList.add('pdf-show'); shownTabs.push(tc); }
+    });
+    document.querySelectorAll('#'+c+'-section .tab-content.active').forEach(tc=>{
+      if(!tc.classList.contains('pdf-show')){ tc.classList.remove('active'); deactivated.push(tc); }
+    });
+  });
+  if(!wantChart){ document.querySelectorAll('.overview-chart').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
+  if(!wantTrend){ document.querySelectorAll('.trend-chart-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
+
+  const restore=()=>{
+    targetSections.forEach(s=>s.classList.remove('print-target'));
+    shownTabs.forEach(tc=>tc.classList.remove('pdf-show'));
+    deactivated.forEach(tc=>tc.classList.add('active'));
+    hidden.forEach(e=>e.classList.remove('print-hide'));
+    made.forEach(({img,cv})=>{ try{img.remove();cv.style.display='';}catch(e){} });
+    document.querySelectorAll('.detail-panel.pdf-show').forEach(p=>{p.classList.remove('pdf-show','show');p.style.display='';});
+    Object.keys(origActiveTab).forEach(c=>{
+      const sec=document.getElementById(c+'-section'); if(!sec)return;
+      sec.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+      const id=origActiveTab[c]; const t=id?document.getElementById(id):null;
+      if(t){ t.classList.add('active'); if(window._chartState&&window._chartState[id]){try{renderChart(id);}catch(e){}} }
+    });
+    window.removeEventListener('afterprint',restore);
+  };
+  window.addEventListener('afterprint',restore);
+
+  if(busy)busy.remove();
+  setTimeout(()=>window.print(),350);
+}
 
 // === Init ===
 initCountry('korea');
@@ -699,41 +841,77 @@ async function runSelectedCapture(mode){
       link.href=URL.createObjectURL(blob);link.click();URL.revokeObjectURL(link.href);
     }
   }else{
-    // ZIP all categories
-    const cats=st.catNames.filter(c=>st.active.has(c));
-    const total=cats.length;
+    // ZIP — 국가 선택 지원
+    const selCountries=[...document.querySelectorAll('#capCountryGrid .cap-country-item.selected')].map(e=>e.dataset.country);
     const prog=document.createElement('div');
     prog.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:20px 32px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:10000;font-size:14px;font-weight:600;text-align:center';
     prog.innerHTML='<div id="zProg">준비 중...</div>';
     document.body.appendChild(prog);
     const pEl=document.getElementById('zProg');
-    
     const zip=new JSZip();
-    for(let ci=0;ci<cats.length;ci++){
-      const cat=cats[ci];
-      const catIdx=st.catNames.indexOf(cat);
-      const panelId=activeTabId+'-'+catIdx;
-      const panel=document.getElementById(panelId);
-      if(!panel)continue;
-      pEl.textContent=cat+' ('+(ci+1)+'/'+total+')';
-      
-      const wasOpen=panel.classList.contains('show');
-      panel.classList.add('show');panel.style.display='block';
-      if(!wasOpen&&st.data[cat]){
-        renderTrendChart(panelId,st.data,cat,st.accentRgba);
-        panel._tagMetrics=panel._tagMetrics||(st.mainLabel==='MoM'?['mom']:['yoy']);
-        renderTagChart(panelId,st.data,cat,st.accentRgba);
-        await new Promise(r=>setTimeout(r,600));
+
+    if(!isRegion && selCountries.length){
+      // 여러 국가 반복 (현재 보고 있는 시술/수술 종류 유지)
+      const subKind=activeTabId.includes('-susul-')?'susul':'sisul';
+      for(const country of selCountries){
+        await _withCountryVisible(country, async(sec)=>{
+          const tabId=country+'-'+subKind+'-tab';
+          const tab=document.getElementById(tabId); if(!tab)return;
+          sec.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+          tab.classList.add('active');
+          const cst=window._chartState[tabId]; if(!cst)return;
+          const ccats=cst.catNames.filter(c=>cst.active.has(c));
+          for(let ci=0;ci<ccats.length;ci++){
+            const cat=ccats[ci];const catIdx=cst.catNames.indexOf(cat);const panelId=tabId+'-'+catIdx;
+            const panel=document.getElementById(panelId);if(!panel)continue;
+            pEl.textContent=country+' · '+cat+' ('+(ci+1)+'/'+ccats.length+')';
+            panel.classList.add('show');panel.style.display='block';
+            if(cst.data[cat]){
+              renderTrendChart(panelId,cst.data,cat,cst.accentRgba);
+              panel._tagMetrics=panel._tagMetrics||(cst.mainLabel==='MoM'?['mom']:['yoy']);
+              renderTagChart(panelId,cst.data,cat,cst.accentRgba);
+              await new Promise(r=>setTimeout(r,600));
+            }
+            const blob=await capturePanel(panel,cst,opts);
+            if(blob)zip.file(country+'/'+String(ci+1).padStart(2,'0')+'_'+cat+'.png',blob);
+            panel.classList.remove('show');panel.style.display='';
+          }
+        });
       }
-      const blob=await capturePanel(panel,st,opts);
-      if(blob)zip.file(String(ci+1).padStart(2,'0')+'_'+cat+'.png',blob);
-      if(!wasOpen){panel.classList.remove('show');panel.style.display=''}
+      pEl.textContent='ZIP 생성...';
+      const zb=await zip.generateAsync({type:'blob'});
+      saveAs(zb,'SU_선택국가_'+subKind+'_'+new Date().toISOString().slice(0,10)+'.zip');
+      pEl.textContent='✅ 완료!';
+      setTimeout(()=>prog.remove(),1500);
+    }else{
+      // 단일 뷰(현재 국가/지역) ZIP
+      const cats=st.catNames.filter(c=>st.active.has(c));
+      const total=cats.length;
+      for(let ci=0;ci<cats.length;ci++){
+        const cat=cats[ci];
+        const catIdx=st.catNames.indexOf(cat);
+        const panelId=activeTabId+'-'+catIdx;
+        const panel=document.getElementById(panelId);
+        if(!panel)continue;
+        pEl.textContent=cat+' ('+(ci+1)+'/'+total+')';
+        const wasOpen=panel.classList.contains('show');
+        panel.classList.add('show');panel.style.display='block';
+        if(!wasOpen&&st.data[cat]){
+          renderTrendChart(panelId,st.data,cat,st.accentRgba);
+          panel._tagMetrics=panel._tagMetrics||(st.mainLabel==='MoM'?['mom']:['yoy']);
+          renderTagChart(panelId,st.data,cat,st.accentRgba);
+          await new Promise(r=>setTimeout(r,600));
+        }
+        const blob=await capturePanel(panel,st,opts);
+        if(blob)zip.file(String(ci+1).padStart(2,'0')+'_'+cat+'.png',blob);
+        if(!wasOpen){panel.classList.remove('show');panel.style.display=''}
+      }
+      pEl.textContent='ZIP 생성...';
+      const zb=await zip.generateAsync({type:'blob'});
+      saveAs(zb,'SU_'+viewName+'_'+subTab+'_'+new Date().toISOString().slice(0,10)+'.zip');
+      pEl.textContent='✅ 완료!';
+      setTimeout(()=>prog.remove(),1500);
     }
-    pEl.textContent='ZIP 생성...';
-    const zb=await zip.generateAsync({type:'blob'});
-    saveAs(zb,'SU_'+viewName+'_'+subTab+'_'+new Date().toISOString().slice(0,10)+'.zip');
-    pEl.textContent='✅ 완료!';
-    setTimeout(()=>prog.remove(),1500);
   }
 }
 
