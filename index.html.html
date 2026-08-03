@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>시술/수술 SU 트렌드 분석 (국가별)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
@@ -288,6 +288,7 @@
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capTagChart" checked> <b>📉 상세 태그별 차트</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">YoY/MoM</span></label>
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capBars" checked> <b>📋 상세 태그 SU 바</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">수평 바</span></label>
 <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capTop3" checked> <b>🏆 MoM 성장/하락 Top 3</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">상위 30%</span></label>
+<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:#f8f8f6;cursor:pointer;font-size:.9em"><input type="checkbox" id="capMarket" checked> <b>🏆 인기 병원·대표 이벤트</b> <span style="color:#aaa;font-size:.8em;margin-left:auto">KR</span></label>
 </div>
 <p style="color:#888;font-size:.82em;margin:2px 0 8px">국가 선택 <span style="color:#bbb;font-weight:400">· 미선택 시 현재 국가</span></p>
 <div class="pdf-country-grid" id="capCountryGrid">
@@ -319,6 +320,7 @@
 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.9em;font-weight:600;color:#555"><input type="checkbox" id="pdfSusul" checked> 수술</label>
 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.9em;font-weight:600;color:#555"><input type="checkbox" id="pdfChart" checked> 차트 포함</label>
 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.9em;font-weight:600;color:#555"><input type="checkbox" id="pdfTrend" checked> 월별 추이</label>
+<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.9em;font-weight:600;color:#555"><input type="checkbox" id="pdfMarket" checked> 인기 병원·이벤트</label>
 </div>
 <p style="color:#888;font-size:.82em;margin-bottom:8px">국가 선택</p>
 <button class="pdf-select-all" onclick="toggleAllPdfCountries()">전체 선택/해제</button>
@@ -800,6 +802,7 @@ async function exportPdf(){
   const wantSusul=document.getElementById('pdfSusul')?.checked;
   const wantChart=document.getElementById('pdfChart')?.checked;
   const wantTrend=document.getElementById('pdfTrend')?.checked;
+  const wantMarket=document.getElementById('pdfMarket')?.checked;
   if(!wantSisul && !wantSusul){ alert('시술/수술 중 1개 이상 선택해주세요.'); return; }
   closePdfModal();
   const busy=_busyOverlay('📄 PDF 준비 중 — 차트 렌더링…');
@@ -840,6 +843,7 @@ async function exportPdf(){
   });
   if(!wantChart){ document.querySelectorAll('.overview-chart').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
   if(!wantTrend){ document.querySelectorAll('.trend-chart-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
+  if(!wantMarket){ document.querySelectorAll('.toprank-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
 
   const restore=()=>{
     targetSections.forEach(s=>s.classList.remove('print-target','pch-first'));
@@ -891,7 +895,8 @@ async function runSelectedCapture(mode){
     trend:document.getElementById('capTrend').checked,
     tagChart:document.getElementById('capTagChart').checked,
     bars:document.getElementById('capBars').checked,
-    top3:document.getElementById('capTop3').checked
+    top3:document.getElementById('capTop3').checked,
+    market:document.getElementById('capMarket')?.checked
   };
   
   const isRegion=document.getElementById('region-mode')?.style.display!=='none';
@@ -1029,6 +1034,7 @@ async function capturePanel(panel,st,opts){
   if(opts.tagChart){const el=panel.querySelector('.tag-chart-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   if(opts.bars){const el=panel.querySelector('.bars-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   if(opts.top3){const el=panel.querySelector('.top3-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
+  if(opts.market){const el=panel.querySelector('.toprank-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   
   document.body.appendChild(wrapper);
   await new Promise(r=>setTimeout(r,200));
