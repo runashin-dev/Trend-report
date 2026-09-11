@@ -91,6 +91,7 @@
   .trend-chart-wrap{page-break-inside:avoid;margin:0 0 6px!important;padding:4px!important;height:150px!important}
   .tag-chart-wrap{page-break-inside:avoid;margin:0 0 6px!important;padding:4px!important;height:250px!important}
   .trend-chart-wrap.print-hide{display:none!important}
+  .toprank-wrap.print-hide{display:none!important}
   .up{color:#3b82f6!important}
   .down{color:#ef4444!important}
   .top3-grid{page-break-inside:avoid}
@@ -179,6 +180,13 @@
 .mkt-h-row .fill{display:block;height:100%;background:#6366f1;border-radius:4px}
 .mkt-empty{color:#aaa;font-size:.85em;padding:14px 0}
 @media print{.mkt-row{grid-template-columns:1fr 1fr}.mkt-canvas{height:180px}}
+
+.mkt-share-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:820px){.mkt-share-row{grid-template-columns:1fr}}
+.mkt-share-box{display:flex;flex-direction:column;align-items:center}
+.mkt-share-box .mkt-sub{align-self:flex-start}
+.mkt-share-box .mkt-donut{margin:8px auto 6px}
+.mkt-share-box .mkt-legend{width:100%;max-width:250px;flex:none}
 </style></head><body>
 <div class="container">
 <div class="header"><h1>시술·수술 SU 트렌드 분석</h1><p>2026년 8월 기준 · 국가별 SU 데이터</p></div>
@@ -722,7 +730,15 @@ function switchCompareTab(region,tab,btn){
 }
 
 // === PDF / Capture ===
-function openPdfModal(){document.getElementById('pdfModal')?.classList.add('show');updatePdfExportBtn();}
+function openPdfModal(){
+  const items=[...document.querySelectorAll('#pdfModal .pdf-country-item')];
+  if(items.length && !items.some(i=>i.classList.contains('selected'))){
+    const ab=document.querySelector('.country-btn.active'); let cur=null;
+    if(ab){const mm=(ab.getAttribute('onclick')||'').match(/switchCountry\('([a-z]+)'\)/);if(mm)cur=mm[1];}
+    const target=items.find(i=>i.dataset.country===cur)||items[0];
+    if(target) target.classList.add('selected');
+  }
+  document.getElementById('pdfModal')?.classList.add('show');updatePdfExportBtn();}
 function closePdfModal(){document.getElementById('pdfModal')?.classList.remove('show')}
 
 function getSelectedPdfCountries(){
@@ -1110,23 +1126,59 @@ function marketTopHTML(country,section){
   return h;
 }
 function mktSeg(btn,country,sec){btn.parentNode.querySelectorAll('.mkt-seg-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.getElementById('mkt-'+country+'-top').innerHTML=marketTopHTML(country,sec);}
+function _mktShares(country){
+  var A=ALL_DATA[country]; if(!A) return null;
+  function sec(s){var o=A[s]||{},t=0,cats=[];for(var cat in o){var ct=0;(o[cat].items||[]).forEach(function(it){var v=it.v;ct+=(v&&v.length?v[v.length-1]:0)});cats.push([cat,ct]);t+=ct;}cats.sort(function(a,b){return b[1]-a[1]});return{total:t,cats:cats};}
+  return {sisul:sec('sisul'),susul:sec('susul')};
+}
+function _mktPct(cats,total){
+  var out=[],top=cats.slice(0,6),rest=cats.slice(6).reduce(function(a,b){return a+b[1]},0);
+  top.forEach(function(x){out.push([x[0], total?Math.round(x[1]/total*1000)/10:0])});
+  if(rest>0) out.push(['기타', total?Math.round(rest/total*1000)/10:0]);
+  return out;
+}
+var _MKTCOL=['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#a855f7','#9ca3af'];
+function _mktDonut(id,labels,values,colors){
+  _mkDestroy(id);var ctx=document.getElementById(id);if(!ctx)return;
+  window.chartInstances=window.chartInstances||{};
+  window.chartInstances[id]=new Chart(ctx,{type:'doughnut',data:{labels:labels,datasets:[{data:values,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:true}}}});
+}
+function _mktLegend(id,labels,values,colors){
+  var el=document.getElementById(id);if(!el)return;
+  el.innerHTML=labels.map(function(l,i){return '<div class="dl"><span class="dot" style="background:'+colors[i%colors.length]+'"></span><span class="nm">'+_mkEsc(l)+'</span><span class="v">'+values[i]+'%</span></div>'}).join('');
+}
+function mktShareSeg(btn,country,sec){
+  btn.parentNode.querySelectorAll('.mkt-seg-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');
+  var sh=_mktShares(country);if(!sh)return;var s=sh[sec];var pct=_mktPct(s.cats,s.total);
+  var labels=pct.map(function(x){return x[0]}),vals=pct.map(function(x){return x[1]});
+  _mktDonut('mkt-'+country+'-catdonut',labels,vals,_MKTCOL);
+  _mktLegend('mkt-'+country+'-catlegend',labels,vals,_MKTCOL);
+}
 function renderMarketTab(country){
   var box=document.getElementById(country+'-market-tab'); if(!box) return; if(box._done) return;
-  var m=MARKET_DATA[country]; var h='';
-  if(m){
-    h+='<div class="mkt-card mkt-donut-card"><div class="mkt-ct">카테고리 구성비 <span class="mkt-note">상담신청 기준</span></div>';
-    h+='<div class="mkt-donut-wrap"><div class="mkt-donut"><canvas id="mkt-'+country+'-donut"></canvas></div><div class="mkt-legend" id="mkt-'+country+'-legend"></div></div></div>';
+  var sh=_mktShares(country); var h='';
+  if(sh){
+    var stot=sh.sisul.total,utot=sh.susul.total,tot=(stot+utot)||1;
+    var sp=Math.round(stot/tot*1000)/10,up=Math.round(utot/tot*1000)/10;
+    h+='<div class="mkt-card"><div class="mkt-ct">시술 · 수술 점유율 <span class="mkt-note">최신월(2026.08) SU 기준</span></div>';
+    h+='<div class="mkt-share-row">';
+    h+='<div class="mkt-share-box"><div class="mkt-sub">시술 vs 수술</div><div class="mkt-donut"><canvas id="mkt-'+country+'-ss"></canvas></div><div class="mkt-legend" id="mkt-'+country+'-sslegend"></div></div>';
+    h+='<div class="mkt-share-box"><div class="mkt-sub">카테고리별 점유율</div><div class="mkt-seg"><button class="mkt-seg-btn active" onclick="mktShareSeg(this,\''+country+'\',\'sisul\')">시술</button><button class="mkt-seg-btn" onclick="mktShareSeg(this,\''+country+'\',\'susul\')">수술</button></div><div class="mkt-donut"><canvas id="mkt-'+country+'-catdonut"></canvas></div><div class="mkt-legend" id="mkt-'+country+'-catlegend"></div></div>';
+    h+='</div></div>';
   }
   h+='<div class="mkt-card"><div class="mkt-ct">인기 이벤트 · 병원 <span class="mkt-note">지난달(2026.08) 상담신청 기준</span></div>';
   h+='<div class="mkt-seg"><button class="mkt-seg-btn active" onclick="mktSeg(this,\''+country+'\',\'sisul\')">시술</button><button class="mkt-seg-btn" onclick="mktSeg(this,\''+country+'\',\'susul\')">수술</button></div>';
   h+='<div id="mkt-'+country+'-top">'+marketTopHTML(country,'sisul')+'</div></div>';
   box.innerHTML=h; box._done=true;
-  if(!(m && window.Chart)) return;
-  window.chartInstances=window.chartInstances||{};
-  var dc='mkt-'+country+'-donut'; _mkDestroy(dc); var dctx=document.getElementById(dc);
-  var dcol=['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#9ca3af'];
-  if(dctx){window.chartInstances[dc]=new Chart(dctx,{type:'doughnut',data:{labels:m.donut.labels,datasets:[{data:m.donut.values,backgroundColor:dcol,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:true}}}});
-    document.getElementById('mkt-'+country+'-legend').innerHTML=m.donut.labels.map(function(l,i){return '<div class="dl"><span class="dot" style="background:'+dcol[i%dcol.length]+'"></span><span class="nm">'+l+'</span><span class="v">'+m.donut.values[i]+'%</span></div>';}).join('');}
+  if(!(sh && window.Chart)) return;
+  var stot=sh.sisul.total,utot=sh.susul.total,tot=(stot+utot)||1;
+  var sp=Math.round(stot/tot*1000)/10,up=Math.round(utot/tot*1000)/10;
+  _mktDonut('mkt-'+country+'-ss',['시술','수술'],[sp,up],['#6366f1','#e11d48']);
+  _mktLegend('mkt-'+country+'-sslegend',['시술','수술'],[sp,up],['#6366f1','#e11d48']);
+  var pct=_mktPct(sh.sisul.cats,sh.sisul.total);
+  var labels=pct.map(function(x){return x[0]}),vals=pct.map(function(x){return x[1]});
+  _mktDonut('mkt-'+country+'-catdonut',labels,vals,_MKTCOL);
+  _mktLegend('mkt-'+country+'-catlegend',labels,vals,_MKTCOL);
 }
 
 </script></body></html>
