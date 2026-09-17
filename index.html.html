@@ -91,6 +91,8 @@
   .trend-chart-wrap{page-break-inside:avoid;margin:0 0 6px!important;padding:4px!important;height:150px!important}
   .tag-chart-wrap{page-break-inside:avoid;margin:0 0 6px!important;padding:4px!important;height:250px!important}
   .trend-chart-wrap.print-hide{display:none!important}
+  .trend-drill-bar.print-hide{display:none!important}
+  .trend-drill-bar{page-break-inside:avoid;margin:0 0 4px!important}
   .toprank-wrap.print-hide{display:none!important}
   .up{color:#3b82f6!important}
   .down{color:#ef4444!important}
@@ -529,19 +531,26 @@ function renderTrendForTag(panelId,item,accentRgba){
   const monthLabels=['25.8','25.9','25.10','25.11','25.12','26.1','26.2','26.3','26.4','26.5','26.6','26.7','26.8'];
   const vals=item.v.slice(0,13);
   const trendWrap=cv.closest('.trend-chart-wrap');
-  let backBtn=trendWrap.querySelector('.trend-back-btn');
+  const guide=trendWrap.querySelector('.trend-guide');if(guide)guide.style.display='none';
+  let drillBar=trendWrap.parentElement.querySelector('.trend-drill-bar');
+  if(!drillBar){
+    drillBar=document.createElement('div');drillBar.className='trend-drill-bar';
+    drillBar.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;padding:0 2px';
+    trendWrap.parentElement.insertBefore(drillBar,trendWrap);
+  }
+  let tagLabel=drillBar.querySelector('.trend-tag-label');
+  if(!tagLabel){tagLabel=document.createElement('span');tagLabel.className='trend-tag-label';tagLabel.style.cssText='font-size:.8em;font-weight:700;color:#555';drillBar.appendChild(tagLabel)}
+  tagLabel.textContent='📌 '+item.n;
+  let backBtn=drillBar.querySelector('.trend-back-btn');
   if(!backBtn){
     backBtn=document.createElement('button');backBtn.className='trend-back-btn';
-    backBtn.style.cssText='position:absolute;top:8px;right:12px;padding:3px 10px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#888;font-size:.75em;cursor:pointer;z-index:5';
+    backBtn.style.cssText='padding:3px 10px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#888;font-size:.75em;cursor:pointer;white-space:nowrap';
     backBtn.textContent='← 카테고리 전체';
-    backBtn.onclick=function(){backBtn.remove();const tl=trendWrap.querySelector('.trend-tag-label');if(tl)tl.remove();
+    backBtn.onclick=function(){drillBar.remove();if(guide)guide.style.display='';
       const parts=panelId.split('-');const catIdx=parseInt(parts.pop());const tabId=parts.join('-');
       const st=window._chartState[tabId];if(st){const cat=st.catNames[catIdx];if(cat)renderTrendChart(panelId,st.data,cat,st.accentRgba)}};
-    trendWrap.style.position='relative';trendWrap.appendChild(backBtn);
+    drillBar.appendChild(backBtn);
   }
-  let tagLabel=trendWrap.querySelector('.trend-tag-label');
-  if(!tagLabel){tagLabel=document.createElement('span');tagLabel.className='trend-tag-label';tagLabel.style.cssText='position:absolute;top:8px;left:12px;font-size:.8em;font-weight:700;color:#555;z-index:5';trendWrap.appendChild(tagLabel)}
-  tagLabel.textContent='📌 '+item.n;
   const key=cvId;if(chartInstances[key])chartInstances[key].destroy();
   chartInstances[key]=new Chart(cv,{type:'line',data:{labels:monthLabels,datasets:[{label:item.n,data:vals,borderColor:accentRgba+'0.85)',backgroundColor:'transparent',borderWidth:2.5,fill:false,tension:0,pointRadius:3,pointBackgroundColor:accentRgba+'0.85)',pointHoverRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:false}},scales:{x:{ticks:{font:{size:10},color:'#999'},grid:{display:false}},y:{display:false}}}});
 }
@@ -858,7 +867,7 @@ async function exportPdf(){
     });
   });
   if(!wantChart){ document.querySelectorAll('.overview-chart').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
-  if(!wantTrend){ document.querySelectorAll('.trend-chart-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
+  if(!wantTrend){ document.querySelectorAll('.trend-chart-wrap,.trend-drill-bar').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
   if(!wantMarket){ document.querySelectorAll('.toprank-wrap').forEach(e=>{e.classList.add('print-hide');hidden.push(e);}); }
 
   const restore=()=>{
@@ -1046,7 +1055,7 @@ async function capturePanel(panel,st,opts){
   wrapper.style.cssText='background:#fff;padding:20px;width:1200px;position:fixed;left:-9999px;top:0;';
   const h3=panel.querySelector('h3');
   if(h3)wrapper.appendChild(h3.cloneNode(true));
-  if(opts.trend){const el=panel.querySelector('.trend-chart-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
+  if(opts.trend){const db=panel.querySelector('.trend-drill-bar');if(db)wrapper.appendChild(db.cloneNode(true));const el=panel.querySelector('.trend-chart-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   if(opts.tagChart){const el=panel.querySelector('.tag-chart-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   if(opts.bars){const el=panel.querySelector('.bars-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
   if(opts.top3){const el=panel.querySelector('.top3-wrap');if(el)wrapper.appendChild(el.cloneNode(true))}
